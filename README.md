@@ -35,8 +35,5 @@
 ## 声明
 
 本项目基于 [mc-skinviewer](https://github.com/daidr/mc-skinviewer) 开发，遵循 MIT 许可证。
-<<<<<<< HEAD
 
 本项目与 Mojang 和 Microsoft 没有任何关联，只是纯兴趣开发。
-=======
->>>>>>> e3a8fce5d36cffdb60117a2c5cfbdb249a92f75a
