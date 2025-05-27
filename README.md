@@ -36,4 +36,4 @@
 
 本项目基于 [mc-skinviewer](https://github.com/daidr/mc-skinviewer) 开发，遵循 MIT 许可证。
 
-Minecraft 是 Mojang Studios 的商标，本项目与 Mojang 和 Microsoft 没有任何关联。 
+本项目与 Mojang 和 Microsoft 没有任何关联，只是纯兴趣开发。
