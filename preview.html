@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minecraft 皮肤预览</title>
+    <link rel="stylesheet" href="mc-skinviewer-main/skinviewer.css" />
+    <link rel="stylesheet" href="mc-skinviewer-main/skinviewer-animation.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Microsoft YaHei", sans-serif;
+        background-color: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .preview-container {
+        width: 800px;
+        max-width: 90%;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .preview-content {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 20px;
+        justify-content: center;
+      }
+      .skin-viewer-container {
+        width: 400px;
+        height: 450px;
+        flex-grow: 1;
+      }
+      .controls-container {
+        width: 300px;
+        padding: 10px;
+      }
+      .skin-viewer {
+        width: 100%;
+        height: 400px;
+      }
+      .animation-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .animation-controls-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+      }
+      .btn {
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .btn:hover {
+        background-color: #3e8e41;
+      }
+      .skin-info {
+        text-align: center;
+        margin-top: 20px;
+        width: 100%;
+        padding: 10px;
+        border-top: 1px solid #eee;
+      }
+      .skin-info h2 {
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+      .skin-info p {
+        color: #666;
+        font-size: 14px;
+      }
+      .back-button {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .back-button a {
+        color: #4caf50;
+        text-decoration: none;
+      }
+      .back-button a:hover {
+        text-decoration: underline;
+      }
+      @media (max-width: 768px) {
+        .preview-content {
+          flex-direction: column;
+        }
+        .skin-viewer-container,
+        .controls-container {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-container">
+      <div class="preview-content">
+        <div class="skin-viewer-container">
+          <div class="skin-viewer d-skin-aciton-rotate"></div>
+        </div>
+
+        <div class="controls-container">
+          <div class="animation-controls">
+            <div class="animation-controls-title">动画控制：</div>
+            <button class="btn" id="btn-rotate">旋转</button>
+            <button class="btn" id="btn-walk">行走</button>
+            <button class="btn" id="btn-run">跑步</button>
+            <button class="btn" id="btn-reset">重置</button>
+          </div>
+
+          <div class="skin-info">
+            <h2 id="skin-name">加载中...</h2>
+            <p id="skin-model">模型: Steve</p>
+          </div>
+
+          <div class="back-button">
+            <a href="index.html">返回皮肤查看器</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="mc-skinviewer-main/skinviewer.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // 获取URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const skinUrl = urlParams.get("url");
+        const skinName = urlParams.get("name") || "未命名皮肤";
+        const skinModel = urlParams.get("model") || "steve";
+
+        // 获取DOM元素
+        const skinViewerContainer = document.querySelector(".skin-viewer");
+        const btnRotate = document.getElementById("btn-rotate");
+        const btnWalk = document.getElementById("btn-walk");
+        const btnRun = document.getElementById("btn-run");
+        const btnReset = document.getElementById("btn-reset");
+        const skinNameElement = document.getElementById("skin-name");
+        const skinModelElement = document.getElementById("skin-model");
+
+        // 更新皮肤信息
+        skinNameElement.textContent = skinName;
+        skinModelElement.textContent = `模型: ${
+          skinModel === "alex" ? "Alex (细臂)" : "Steve (宽臂)"
+        }`;
+
+        // 初始化皮肤查看器
+        const skinViewer = new SkinViewer({
+          container: skinViewerContainer,
+        });
+
+        // 设置皮肤模型
+        if (skinModel === "alex") {
+          skinViewer.setSkinType(SkinViewer.SKIN_TYPE.ALEX);
+        } else {
+          skinViewer.setSkinType(SkinViewer.SKIN_TYPE.STEVE);
+        }
+
+        // 如果有皮肤URL，则加载皮肤
+        if (skinUrl) {
+          const skinImage = new Image();
+          skinImage.crossOrigin = "Anonymous";
+          skinImage.onload = () => {
+            skinViewer.setSkin(skinImage);
+          };
+          skinImage.onerror = () => {
+            alert("无法加载皮肤图片，请检查URL是否正确！");
+          };
+          skinImage.src = skinUrl;
+        }
+
+        // 动画控制类
+        const animationControls = {
+          // 当前动画类名
+          currentAnimation: "rotate",
+
+          // 移除所有动画
+          removeAllAnimations() {
+            skinViewerContainer.classList.remove(
+              "d-skin-aciton-rotate",
+              "d-skin-aciton-walk",
+              "d-skin-aciton-run",
+              "d-skin-aciton-rotate-paused",
+              "d-skin-action-skeleton-paused"
+            );
+            this.currentAnimation = "";
+          },
+
+          // 添加旋转动画
+          addRotate() {
+            this.removeAllAnimations();
+            skinViewerContainer.classList.add("d-skin-aciton-rotate");
+            this.currentAnimation = "rotate";
+          },
+
+          // 添加行走动画
+          addWalk() {
+            this.removeAllAnimations();
+            skinViewerContainer.classList.add("d-skin-aciton-walk");
+            this.currentAnimation = "walk";
+          },
+
+          // 添加跑步动画
+          addRun() {
+            this.removeAllAnimations();
+            skinViewerContainer.classList.add("d-skin-aciton-run");
+            this.currentAnimation = "run";
+          },
+
+          // 重置动画
+          reset() {
+            this.removeAllAnimations();
+            // 重置主旋转
+            skinViewer.resetMainRotate();
+          },
+        };
+
+        // 事件监听 - 动画控制按钮
+        btnRotate.addEventListener("click", () =>
+          animationControls.addRotate()
+        );
+        btnWalk.addEventListener("click", () => animationControls.addWalk());
+        btnRun.addEventListener("click", () => animationControls.addRun());
+        btnReset.addEventListener("click", () => animationControls.reset());
+
+        // 添加拖动旋转功能
+        {
+          let startX = 0;
+          let startY = 0;
+          let defX = 0;
+          let defY = 0;
+          let pointDown = false;
+
+          skinViewerContainer.addEventListener("pointerdown", (e) => {
+            // 不再停止动画，而是允许在动画播放时也能拖动
+            const { clientX, clientY } = e;
+            startX = clientX;
+            startY = clientY;
+            const [a, b] = skinViewer.getMainRotate();
+            defX = a;
+            defY = b;
+            pointDown = true;
+          });
+
+          document.addEventListener("pointermove", (e) => {
+            if (!pointDown) return;
+
+            const { clientX, clientY } = e;
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+            skinViewer.setMainRotate(
+              defX - deltaY * 0.5,
+              defY + deltaX * 0.5,
+              0
+            );
+          });
+
+          document.addEventListener("pointerup", () => {
+            pointDown = false;
+            // 如果当前没有动画，才重置旋转
+            if (!animationControls.currentAnimation) {
+              skinViewer.resetMainRotate();
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
